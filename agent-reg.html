@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Portal | Trending Loop</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .box { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+        .pay-box { background: #fffde7; border: 2px dashed #fbc02d; padding: 15px; border-radius: 15px; }
+        button { background: #1a73e8; color: white; border: none; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Agent Registration</h2>
+    <input type="text" id="aName" placeholder="Full Name">
+    <input type="number" id="aPhone" placeholder="WhatsApp Number">
+    <div class="pay-box">
+        <p>Fee: <b>₹29</b></p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=adityahard@fam&pn=TrendingLoop&am=29" width="180">
+        <input type="text" id="aUtr" placeholder="Enter UTR Number">
+    </div>
+    <button onclick="saveAgent()">Register Now</button>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD0pWvaqGlQH93w3ddooHQ6Yq1-6GHus6w",
+        authDomain: "trending-loop.firebaseapp.com",
+        projectId: "trending-loop",
+        storageBucket: "trending-loop.firebasestorage.app",
+        messagingSenderId: "206395963563",
+        appId: "1:206395963563:web:5bba53723d14c8af139fee"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function saveAgent() {
+        const name = document.getElementById('aName').value;
+        const phone = document.getElementById('aPhone').value;
+        const utr = document.getElementById('aUtr').value;
+        if(!name || !phone || !utr) return alert("Fill details!");
+        const id = "TL" + phone.slice(-4);
+        db.collection("agents").doc(id).set({ name, whatsapp: phone, utr, agentID: id, status: "Pending" })
+        .then(() => { alert("Success! Your ID is: " + id); });
+    }
+</script>
+</body>
+</html>
