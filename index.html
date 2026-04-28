@@ -24,6 +24,11 @@
         .overlay.active { display: block; }
         .sidebar-link { display: block; padding: 15px 0; color: #000; text-decoration: none; font-weight: 700; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #f0f0f0; }
 
+        /* Trust Card in Sidebar */
+        .trust-card { margin-top: 30px; padding: 15px; background: #000; border-radius: 15px; color: #fff; text-align: center; }
+        .trust-val { color: var(--gold); font-weight: 900; font-size: 18px; }
+        .trust-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
+
         /* Top Slider */
         #mainSlider { background: #111; color: #fff; height: 45px; display: flex; align-items: center; overflow: hidden; position: relative; }
         .slider-track { display: flex; transition: 0.6s ease-in-out; width: 100%; position: absolute; }
@@ -77,6 +82,16 @@
         
         <a href="portal.html" class="sidebar-link">Partner Registration 🚀</a>
         <a href="portal.html" class="sidebar-link">Vendor Console 🔑</a>
+        
+        <a href="#" class="sidebar-link" style="font-size: 12px; color: #888;">Terms & Conditions 📜</a>
+
+        <div class="trust-card">
+            <div class="trust-val">10,000+</div>
+            <div class="trust-label">SUCCESSFUL SALES</div>
+            <div class="trust-val">7,000+</div>
+            <div class="trust-label">VERIFIED VENDORS</div>
+            <div style="margin-top: 15px; font-size: 9px; color: #555; font-weight: 800;">TRENDING LOOP OFFICIAL</div>
+        </div>
     </div>
 
     <div class="navbar">
@@ -249,14 +264,12 @@
             const vSnap = await db.collection("vendors").where("shop", "==", activeP.store).get();
             let vPh = "9897180748"; vSnap.forEach(v => vPh = v.data().phone);
 
-            // SAVING SIZE TO FIREBASE
             const res = await db.collection("orders").add({ item: activeP.name, size: sz, customer: n, phone: ph, address: ad, payment: pm, price: activeP.price, store: activeP.store, status: "Pending", time: new Date() });
 
             let myOrders = JSON.parse(localStorage.getItem("myOrders") || "[]");
             myOrders.push(res.id);
             localStorage.setItem("myOrders", JSON.stringify(myOrders));
 
-            // ADDING SIZE TO WHATSAPP MESSAGE
             const msg = `*NEW ORDER FOR ${activeP.store.toUpperCase()}* 📦\n\n*Order ID:* #${res.id.slice(-6)}\n*Item:* ${activeP.name}\n*Size:* ${sz}\n*Customer:* ${n}\n*Phone:* ${ph}\n*Address:* ${ad}\n\n_Powered by Trending Loop_`;
             window.open(`https://wa.me/91${vPh}?text=${encodeURIComponent(msg)}`, '_blank');
             showTrack();
@@ -271,4 +284,4 @@
         window.onload = init;
     </script>
 </body>
-</html>
+                </html>
