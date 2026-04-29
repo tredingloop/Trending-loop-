@@ -134,7 +134,7 @@
         if(!s || !document.getElementById('rPhone').value) return alert("Fill all details!");
         document.getElementById('regDetails').classList.add('hidden');
         document.getElementById('payStep').classList.remove('hidden');
-        document.getElementById('regQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('upi://pay?pa=9897180748@fam&am=799&tn=RegFee_'+s)}`;
+        document.getElementById('regQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('upi://pay?pa=adityahard@fam&am=799&tn=RegFee_'+s)}`;
     }
 
     async function verifyAndRegister() {
