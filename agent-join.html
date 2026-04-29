@@ -69,7 +69,6 @@
 
         if(!name || !phone || !pass) return alert("Bhai, saari details toh bharo!");
 
-        // Logic: Create ID like TL + 4 Random Numbers (e.g., TL8291)
         const randomNumber = Math.floor(1000 + Math.random() * 9000);
         generatedID = "TL" + randomNumber;
 
@@ -77,28 +76,37 @@
         document.getElementById('regStep').style.display = 'none';
         document.getElementById('payStep').style.display = 'block';
         
-        const upi = "9897180748@fam";
-        // QR updated with Generated ID in Transaction Note
-        document.getElementById('qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('upi://pay?pa='+upi+'&am=29&tn=AgentFee_'+generatedID)}`;
+        // Updated UPI ID
+        const upi = "adityahard@fam";
+        
+        // Generate QR with your UPI and Transaction Note
+        const upiLink = `upi://pay?pa=${upi}&pn=Trending%20Loop&am=29&tn=AgentFee_${generatedID}&cu=INR`;
+        document.getElementById('qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiLink)}`;
     }
 
     async function registerAgent() {
         const utr = document.getElementById('txn').value;
         if(!utr) return alert("Enter UTR number!");
 
-        await db.collection("agents").add({
-            name: document.getElementById('aName').value,
-            phone: document.getElementById('aPhone').value,
-            agentID: generatedID, // System generated ID saved here
-            password: document.getElementById('aPass').value,
-            utr: utr,
-            status: "Pending",
-            time: new Date()
-        });
+        try {
+            await db.collection("agents").add({
+                name: document.getElementById('aName').value,
+                phone: document.getElementById('aPhone').value,
+                agentID: generatedID,
+                password: document.getElementById('aPass').value,
+                utr: utr,
+                status: "Pending",
+                time: new Date()
+            });
 
-        alert("Application Sent! Your ID is: " + generatedID + ". Save it and wait for Admin activation.");
-        window.location.href = "agent.html";
+            alert("Application Sent! Your ID is: " + generatedID + ". Save it and wait for Admin activation.");
+            window.location.href = "agent.html";
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            alert("Bhai kuch error aa gaya, internet check karo!");
+        }
     }
 </script>
 </body>
 </html>
+
