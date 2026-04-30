@@ -164,10 +164,11 @@
         renderHome(); updateCartBadge();
     }
 
+    // FIX: Base price vendor wali dikhegi home screen pe
     function renderHome() {
         const grid = document.getElementById('mainGrid'); grid.innerHTML = "";
         allP.forEach((p, idx) => {
-            grid.innerHTML += `<div class="product-card" onclick="viewProduct(${idx})"><img src="${p.images[0]}"><div class="p-info"><span class="p-shop-tag">${p.store.toUpperCase()}</span><div class="p-name">${p.name}</div><span class="p-price">₹${getPrices(p.price).total}</span></div></div>`;
+            grid.innerHTML += `<div class="product-card" onclick="viewProduct(${idx})"><img src="${p.images[0]}"><div class="p-info"><span class="p-shop-tag">${p.store.toUpperCase()}</span><div class="p-name">${p.name}</div><span class="p-price">₹${p.price}</span></div></div>`;
         });
     }
 
@@ -176,14 +177,15 @@
         document.getElementById('homeView').style.display='none'; document.getElementById('trackView').style.display='none'; document.getElementById('detailView').style.display='block';
         document.getElementById('mainImg').src = activeP.images[0];
         document.getElementById('detName').innerText = activeP.name;
-        document.getElementById('detPrice').innerText = "₹" + getPrices(activeP.price).total;
+        // FIX: Detail page par bhi vendor price dikhegi
+        document.getElementById('detPrice').innerText = "₹" + activeP.price;
         document.getElementById('detDesc').innerText = activeP.desc || "Verified Quality product.";
         document.getElementById('detDesc').className = "desc-collapsed";
         document.getElementById('detShopName').innerText = activeP.store;
         const vSnap = await db.collection("vendors").where("shop", "==", activeP.store).get();
         vSnap.forEach(v => { document.getElementById('detShopLogo').src = v.data().logo || 'https://cdn-icons-png.flaticon.com/512/606/606673.png'; });
         const sGrid = document.getElementById('suggestionGrid'); sGrid.innerHTML = "";
-        allP.slice(0, 4).forEach((p, i) => { if(p.id !== activeP.id) sGrid.innerHTML += `<div class="product-card" onclick="viewProduct(${allP.indexOf(p)})"><img src="${p.images[0]}"><div class="p-info"><div>${p.name}</div><div class="p-price">₹${getPrices(p.price).total}</div></div></div>`; });
+        allP.slice(0, 4).forEach((p, i) => { if(p.id !== activeP.id) sGrid.innerHTML += `<div class="product-card" onclick="viewProduct(${allP.indexOf(p)})"><img src="${p.images[0]}"><div class="p-info"><div>${p.name}</div><div class="p-price">₹${p.price}</div></div></div>`; });
         window.scrollTo(0,0);
     }
 
@@ -206,6 +208,7 @@
         } catch(e) { alert("Error!"); }
     }
 
+    // Yahan calculations ho rahi hain jo Checkout page par dikhengi
     function openOrderModal() {
         const pr = getPrices(activeP.price);
         document.getElementById('qrAmt').innerText = pr.total;
@@ -226,4 +229,5 @@
     init();
 </script>
 </body>
-</html>
+                </html>
+                
