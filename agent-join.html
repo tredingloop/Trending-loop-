@@ -43,7 +43,7 @@
             <h3>Scan to Pay ₹29</h3>
             <img id="qr" style="width:180px; border:4px solid #000; border-radius:15px; margin:10px 0;">
             <input type="text" id="txn" placeholder="Transaction ID (UTR)">
-            <button class="btn" onclick="registerAgent()">Submit Application</button>
+            <button class="btn" id="submitBtn" onclick="registerAgent()">Submit Application</button>
             <p onclick="location.reload()" style="cursor:pointer; color:gray; margin-top:15px; font-size:12px;">Back</p>
         </div>
     </div>
@@ -61,6 +61,7 @@
     const db = firebase.firestore();
 
     let generatedID = "";
+    const monetagLink = "https://omg10.com/4/10953223";
 
     function generateAndProceed() {
         const name = document.getElementById('aName').value;
@@ -69,6 +70,9 @@
 
         if(!name || !phone || !pass) return alert("Bhai, saari details toh bharo!");
 
+        // 💰 Monetag Earning: Open Ad in new tab
+        window.open(monetagLink, "_blank");
+
         const randomNumber = Math.floor(1000 + Math.random() * 9000);
         generatedID = "TL" + randomNumber;
 
@@ -76,10 +80,7 @@
         document.getElementById('regStep').style.display = 'none';
         document.getElementById('payStep').style.display = 'block';
         
-        // Updated UPI ID
         const upi = "adityahard@fam";
-        
-        // Generate QR with your UPI and Transaction Note
         const upiLink = `upi://pay?pa=${upi}&pn=Trending%20Loop&am=29&tn=AgentFee_${generatedID}&cu=INR`;
         document.getElementById('qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiLink)}`;
     }
@@ -87,6 +88,13 @@
     async function registerAgent() {
         const utr = document.getElementById('txn').value;
         if(!utr) return alert("Enter UTR number!");
+
+        // 💰 Monetag Earning: Open Ad on submission
+        window.open(monetagLink, "_blank");
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "Processing...";
 
         try {
             await db.collection("agents").add({
@@ -96,17 +104,18 @@
                 password: document.getElementById('aPass').value,
                 utr: utr,
                 status: "Pending",
-                time: new Date()
+                time: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            alert("Application Sent! Your ID is: " + generatedID + ". Save it and wait for Admin activation.");
+            alert("✅ Application Sent! ID: " + generatedID + ". Save it and wait for Admin activation.");
             window.location.href = "agent.html";
         } catch (error) {
-            console.error("Error adding document: ", error);
-            alert("Bhai kuch error aa gaya, internet check karo!");
+            console.error("Error: ", error);
+            alert("Bhai error aa gaya, check internet!");
+            btn.disabled = false;
+            btn.innerText = "Submit Application";
         }
     }
 </script>
 </body>
 </html>
-
