@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corematrix - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- QR Code Generator CDN Engine Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h1>Corematrix Dashboard</h1>
+            <p>Beginner Training Activation Panel</p>
+        </header>
+
+        <main>
+            <!-- 2 Minute 30 Seconds Live Timer -->
+            <div class="timer-box">
+                <h3>Training Session Starts In:</h3>
+                <div id="countdown" class="timer">02:30</div>
+            </div>
+
+            <!-- Payment Engine Console -->
+            <div class="payment-box">
+                <p style="margin-bottom: 12px; font-weight: 600; color: #cbd5e1;">Scan QR and pay for Access </p>
+                
+                <!-- Dynamic QR isme inject hoga -->
+                <div id="qrcode" class="qr-glow"></div>
+                
+                <div class="upi-highlight">
+                    <span>UPI ID:</span> <strong>adityahard@fam</strong>
+                </div>
+                
+                <a href="upi://pay?pa=adityahard@fam&pn=Corematrix&cu=INR&am=399" class="btn-pay">Open Mobile UPI App</a>
+                
+                <!-- UTR Verification Block -->
+                <div class="utr-section">
+                    <label for="utrInput">Submit UTR / Transaction ID</label>
+                    <input type="text" id="utrInput" placeholder="Enter 12 digit UTR number" maxlength="20">
+                    <button onclick="submitUTR()" class="btn-verify">Verify Submission</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Static Helpdesk Elements -->
+        <footer>
+            <h4>Corematrix Official Helpdesk</h4>
+            <div class="support-links">
+                <p>📢 Telegram: <a href="https://t.me/corematrixpvt" target="_blank">@corematrixpvt</a></p>
+                <p>📞 Help: <a href="tel:+12468213522">+1 (246) 821-3522</a></p>
+                <p>📧 Gmail: <a href="mailto:infoskillssyndicate@gmail.com">infoskillssyndicate@gmail.com</a></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Firebase SDKs Dashboard Connectivity -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = { 
+            apiKey: "AIzaSyD0pWvaqGlQH93w3ddooHQ6Yq1-6GHus6w", 
+            authDomain: "trending-loop.firebaseapp.com", 
+            projectId: "trending-loop", 
+            storageBucket: "trending-loop.firebasestorage.app",
+            messagingSenderId: "206395963563", 
+            appId: "1:206395963563:web:5bba53723d14c8af139fee"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 1. Dynamic Locked Amount (₹399) QR Code Config
+        const lockedAmount = "399"; 
+        const upiDeepLink = `upi://pay?pa=adityahard@fam&pn=Corematrix&cu=INR&am=${lockedAmount}`;
+        
+        new QRCode(document.getElementById("qrcode"), {
+            text: upiDeepLink,
+            width: 170,
+            height: 170,
+            colorDark : "#111827",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // 2. Exact 2:30 Reverse Counter Logic
+        let timeRemaining = 150; 
+        const timerDisplay = document.getElementById('countdown');
+
+        const countdownInterval = setInterval(() => {
+            let minutes = Math.floor(timeRemaining / 60);
+            let seconds = timeRemaining % 60;
+
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            timerDisplay.textContent = `${minutes}:${seconds}`;
+
+            if (timeRemaining <= 0) {
+                clearInterval(countdownInterval);
+                timerDisplay.textContent = "Session Ready!";
+                timerDisplay.style.color = "#38bdf8";
+            }
+            timeRemaining--;
+        }, 1000);
+
+        // 3. UTR Document Injection Logic
+        function submitUTR() {
+            const utrValue = document.getElementById('utrInput').value.trim();
+            const docId = localStorage.getItem("myEnrollId");
+
+            if (!utrValue) {
+                alert("Bhai, pehle valid UTR transaction code box me type kr!");
+                return;
+            }
+
+            if (!docId) {
+                alert("Session footprint missing. Pehle login krke aao!");
+                return;
+            }
+
+            // Database me matching document reference target krke update property run krna
+            db.collection("enrollments").doc(docId).update({
+                utr: utrValue,
+                status: "UTR Verification Submitted"
+            })
+            .then(() => {
+                alert("UTR code saved successfully! Team jaldi verify kregi.");
+                document.getElementById('utrInput').value = "";
+            })
+            .catch((err) => {
+                alert("Submission failed: " + err.message);
+            });
+        }
+    </script>
+</body>
+</html>
