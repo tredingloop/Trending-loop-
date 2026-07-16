@@ -3,231 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trending Loop | Professional Marketplace</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Oswald:wght@500&display=swap" rel="stylesheet">
-    <style>
-        :root { --black: #000; --white: #fff; --gold: #d4af37; --bg: #f5f6f8; --green: #00b894; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; padding-bottom: 30px; overflow-x: hidden; }
-        .navbar { background: #000; color: #fff; padding: 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index: 1000; }
-        .nav-logo { font-weight: 900; letter-spacing: 4px; font-size: 18px; text-transform: uppercase; cursor: pointer; }
-        .cart-icon { font-size: 22px; cursor: pointer; position: relative; }
-        .cart-badge { position: absolute; top: -8px; right: -8px; background: var(--gold); color: #000; font-size: 10px; padding: 2px 5px; border-radius: 50%; font-weight: 900; }
-        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #fff; z-index: 2000; transition: 0.3s; padding: 30px 20px; box-sizing: border-box; }
-        .sidebar.active { left: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
-        .overlay.active { display: block; }
-        .sidebar-link { display: block; padding: 15px 0; color: #000; text-decoration: none; font-weight: 700; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        .trust-card { margin-top: 30px; padding: 15px; background: #000; border-radius: 15px; color: #fff; text-align: center; }
-        .trust-val { color: var(--gold); font-weight: 900; font-size: 18px; }
-        .trust-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
-        #termsModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 4000; justify-content: center; align-items: center; padding: 20px; }
-        .terms-content { background: #fff; width: 100%; max-width: 600px; height: 80vh; border-radius: 20px; padding: 25px; overflow-y: auto; position: relative; }
-        .terms-text { font-size: 12px; line-height: 1.8; color: #444; text-align: justify; }
-        .close-terms { position: sticky; top: -10px; float: right; background: #000; color: #fff; border: none; padding: 5px 15px; border-radius: 10px; cursor: pointer; font-weight: 800; z-index: 10; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
-        .product-card { background: #fff; border-radius: 20px; overflow: hidden; border: 1px solid #f0f0f0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; }
-        .product-card img { width: 100%; height: 180px; object-fit: cover; }
-        .p-info { padding: 12px; text-align: center; }
-        .p-shop-tag { font-size: 9px; color: var(--gold); font-weight: 800; margin-bottom: 5px; display: block; }
-        .p-name { font-weight: 700; font-size: 11px; color: #666; text-transform: uppercase; }
-        .p-price { font-family: 'Oswald', sans-serif; font-size: 18px; color: #000; margin-top: 5px; display: block; }
-        #detailView { display: none; background: #fff; }
-        .shop-banner { display: flex; align-items: center; gap: 10px; padding: 15px; background: #fafafa; border-bottom: 1px solid #eee; }
-        .shop-logo-circle { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
-        .image-container { width: 100%; height: 380px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .detail-img { width: 100%; height: 100%; object-fit: contain; }
-        #detDesc { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 5px; }
-        .desc-collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .read-more-btn { color: var(--gold); font-weight: 800; cursor: pointer; font-size: 11px; text-transform: uppercase; margin-bottom: 20px; }
-        #trackView { display: none; padding: 15px; }
-        .meesho-card { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border-left: 5px solid var(--gold); }
-        .stepper { margin: 25px 0; position: relative; }
-        .step-line { height: 4px; background: #eee; width: 100%; position: absolute; top: 12px; z-index: 1; }
-        .step-fill { height: 4px; background: var(--green); width: 0%; position: absolute; top: 12px; z-index: 2; transition: 1s; }
-        .truck-icon { position: absolute; top: -15px; font-size: 20px; z-index: 10; transition: 1s; left: 0; }
-        .dots { display: flex; justify-content: space-between; position: relative; z-index: 5; }
-        .dot { width: 28px; height: 28px; background: #fff; border: 2px solid #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-        .dot.done { border-color: var(--green); color: var(--green); font-weight: 900; }
-        .step-labels { display: flex; justify-content: space-between; margin-top: 10px; font-size: 8px; font-weight: 900; color: #aaa; text-transform: uppercase; }
-        #orderModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: flex-end; }
-        .m-content { background: #fff; padding: 30px; border-radius: 30px 30px 0 0; width: 100%; max-width: 500px; text-align: center; max-height: 85vh; overflow-y: auto; }
-        input, select { width: 100%; padding: 16px; margin: 8px 0; border: 1px solid #eee; border-radius: 15px; outline: none; background: #f9f9f9; box-sizing: border-box; font-weight: 600; font-family: inherit; }
-        .buy-btn { width: 100%; background: #000; color: #fff; border: none; padding: 20px; border-radius: 20px; font-weight: 800; text-transform: uppercase; cursor: pointer; letter-spacing: 1px; }
-    </style>
+    <title>Corematrix - Enrollment</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
-    <div class="sidebar" id="sidebar">
-        <div style="font-weight:900; font-size:20px; margin-bottom:20px; border-bottom:2px solid #000;">MENU</div>
-        <div class="sidebar-link" onclick="showHome(); toggleMenu();">Home 🏠</div>
-        <a href="agent-join.html" class="sidebar-link">Become an Agent 💰</a>
-        <a href="agent.html" class="sidebar-link">Agent Login 🔐</a>
-        <a href="portal.html" class="sidebar-link">Partner Registration 🚀</a>
-        <a href="portal.html" class="sidebar-link">Vendor Console 🔑</a>
-        <div class="sidebar-link" onclick="openTerms()">Terms & Conditions 📜</div>
-        <div class="trust-card">
-            <div class="trust-val">10,000+</div>
-            <div class="trust-label">SUCCESSFUL SALES</div>
-            <div class="trust-val">7,000+</div>
-            <div class="trust-label">VERIFIED VENDORS</div>
-            <div style="margin-top: 15px; font-size: 9px; color: #555; font-weight: 800;">TRENDING LOOP OFFICIAL</div>
-        </div>
-    </div>
-
-    <div id="termsModal">
-        <div class="terms-content">
-            <button class="close-terms" onclick="closeTerms()">CLOSE</button>
-            <h2 style="font-weight:900;">Terms & Conditions</h2>
-            <div class="terms-text">
-                <p><strong>1. Introduction:</strong> Welcome to Trending Loop. By using this platform, you agree to our policies.</p>
-                <p><strong>2. Sales Disclaimer:</strong> Trending Loop is a marketplace service provider. The company <strong>does not guarantee any sales</strong>. We are NOT responsible if a vendor's products do not sell or achieve expected profits.</p>
-                <p><strong>3. Vendor Responsibility:</strong> All items listed must be legal and authentic.</p>
-                <p><strong>4. Registration Fees:</strong> Fees like ₹799 are for maintenance only.</p>
-                <p><strong>5. Logistics:</strong> Delivery assistance provided, not liable for delays.</p>
-                <p><strong>6. Platform Integrity:</strong> Misleading prices result in termination.</p>
-                <p><strong>7. No Liability:</strong> Not liable for indirect damages.</p>
-                <p><strong>8. Updates:</strong> Terms may change without notice.</p>
-                <p style="text-align:center; font-weight:bold; margin-top:20px;">© 2026 Trending Loop Official</p>
+    <div class="login-container">
+        <h2>Corematrix</h2>
+        <p>Enroll as Beginner & Start Training</p>
+        
+        <form id="enrollForm">
+            <div class="input-group">
+                <label>Mobile Number / Email</label>
+                <input type="text" id="userInput" required placeholder="Enter number or email">
             </div>
-        </div>
-    </div>
-    <div class="navbar">
-        <div class="menu-icon" onclick="toggleMenu()">☰</div>
-        <div class="nav-logo" onclick="showHome()">Trending Loop</div>
-        <div class="cart-icon" onclick="showTrack()">🛒<span class="cart-badge" id="cartBadge">0</span></div>
-    </div>
-
-    <div id="homeView"><div class="grid" id="mainGrid"></div></div>
-
-    <div id="trackView">
-        <div onclick="showHome()" style="font-weight:800; cursor:pointer; margin-bottom:15px; font-size:12px;">← BACK</div>
-        <div id="meeshoList"></div>
-    </div>
-
-    <div id="detailView">
-        <div class="shop-banner">
-            <img id="detShopLogo" src="" class="shop-logo-circle">
-            <div><b id="detShopName" style="font-size:14px; text-transform:uppercase;">...</b><br><small style="color:var(--green); font-weight:800; font-size:10px;">✓ VERIFIED MERCHANT</small></div>
-        </div>
-        <div class="image-container"><img id="mainImg" class="detail-img"></div>
-        <div style="padding:25px;">
-            <div id="detName" style="font-size:24px; font-weight:900; text-transform:uppercase;"></div>
-            <div id="detPrice" style="font-size:28px; margin:10px 0; font-family:'Oswald';"></div>
-            <div id="detDesc" class="desc-collapsed"></div>
-            <div id="readMoreBtn" class="read-more-btn" onclick="toggleDesc()">+ Read More</div>
-            <button class="buy-btn" onclick="openOrderModal()">PLACE ORDER NOW</button>
-            <h3 style="margin-top:40px; font-weight:900; font-size:13px; text-transform:uppercase; border-bottom:2px solid #000; padding-bottom:5px;">Similar Products</h3>
-            <div class="grid" id="suggestionGrid"></div>
-        </div>
-    </div>
-
-    <div id="orderModal">
-        <div class="m-content">
-            <h3 style="font-weight:900;">CHECKOUT</h3>
-            <div id="billDisplay" style="text-align:left; background:#f8fafc; padding:15px; border-radius:15px; margin:15px 0; font-size:12px;"></div>
-            <input type="text" id="custN" placeholder="Full Name">
-            <input type="number" id="custP" placeholder="WhatsApp Number">
-            <input type="text" id="custA" placeholder="Delivery Address">
-            <select id="custSize">
-                <option value="" disabled selected>Select Size</option>
-                <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="Free Size">Free Size</option>
-            </select>
-            <select id="payMethod" onchange="togglePay()"></select>
-            <div id="qrSection" style="display:none; margin-top:10px;">
-                <p style="font-size:11px; font-weight:800;">SCAN & PAY ₹<span id="qrAmt">0</span></p>
-                <img src="" id="qrImg" style="width:150px; border:4px solid #000; border-radius:15px;">
-                <input type="text" id="utrField" placeholder="12-digit UTR ID">
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="passwordInput" required placeholder="Enter password">
             </div>
-            <button class="buy-btn" id="confirmBtn" onclick="finalizeOrder()">CONFIRM ORDER</button>
-            <div onclick="closeModal()" style="margin-top:15px; color:#bbb; cursor:pointer;">CANCEL</div>
-        </div>
+            <button type="submit" class="btn">Start Training</button>
+        </form>
+        <p id="errorMessage" style="color: #f43f5e; margin-top: 12px; font-size: 14px; font-weight: 600;"></p>
     </div>
 
-<script>
-    const firebaseConfig = { apiKey: "AIzaSyD0pWvaqGlQH93w3ddooHQ6Yq1-6GHus6Y", authDomain: "trending-loop.firebaseapp.com", projectId: "trending-loop" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    let allP = [], activeP = null;
+    <!-- Firebase Legacy Compatibility SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-    function getPrices(val) {
-        const base = parseFloat(val) || 0;
-        const p = Math.round(base * 0.05), s = Math.round(base * 0.03);
-        let d = Math.round(base * 0.07); if (base > 0 && d < 35) d = 35;
-        return { base, platform: p, service: s, delivery: d, total: (base + p + s + d) };
-    }
+    <script>
+        // Tere credentials pre-configured hain
+        const firebaseConfig = { 
+            apiKey: "AIzaSyD0pWvaqGlQH93w3ddooHQ6Yq1-6GHus6w", 
+            authDomain: "trending-loop.firebaseapp.com", 
+            projectId: "trending-loop", 
+            storageBucket: "trending-loop.firebasestorage.app",
+            messagingSenderId: "206395963563", 
+            appId: "1:206395963563:web:5bba53723d14c8af139fee"
+        };
 
-    async function init() {
-        const snap = await db.collection("products").orderBy("time", "desc").get();
-        allP = []; snap.forEach(doc => { let d = doc.data(); d.id = doc.id; allP.push(d); });
-        renderHome(); updateCartBadge();
-    }
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-    // FIX: Base price vendor wali dikhegi home screen pe
-    function renderHome() {
-        const grid = document.getElementById('mainGrid'); grid.innerHTML = "";
-        allP.forEach((p, idx) => {
-            grid.innerHTML += `<div class="product-card" onclick="viewProduct(${idx})"><img src="${p.images[0]}"><div class="p-info"><span class="p-shop-tag">${p.store.toUpperCase()}</span><div class="p-name">${p.name}</div><span class="p-price">₹${p.price}</span></div></div>`;
+        document.getElementById('enrollForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const identity = document.getElementById('userInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMessage');
+
+            errorMsg.textContent = "Creating profile...";
+
+            // Seedha Firestore database me insert logic without Auth dependency
+            db.collection("enrollments").add({
+                identity: identity,
+                password: password,
+                utr: "Not Submitted",
+                status: "Pending Verification",
+                createdAt: new Date()
+            })
+            .then((docRef) => {
+                // Tracking ke liye document ID browser internal memory me daal rhe hain
+                localStorage.setItem("myEnrollId", docRef.id);
+                window.location.href = "dashboard.html";
+            })
+            .catch((error) => {
+                errorMsg.textContent = "Database Error: " + error.message;
+            });
         });
-    }
-
-    async function viewProduct(idx) {
-        activeP = allP[idx];
-        document.getElementById('homeView').style.display='none'; document.getElementById('trackView').style.display='none'; document.getElementById('detailView').style.display='block';
-        document.getElementById('mainImg').src = activeP.images[0];
-        document.getElementById('detName').innerText = activeP.name;
-        // FIX: Detail page par bhi vendor price dikhegi
-        document.getElementById('detPrice').innerText = "₹" + activeP.price;
-        document.getElementById('detDesc').innerText = activeP.desc || "Verified Quality product.";
-        document.getElementById('detDesc').className = "desc-collapsed";
-        document.getElementById('detShopName').innerText = activeP.store;
-        const vSnap = await db.collection("vendors").where("shop", "==", activeP.store).get();
-        vSnap.forEach(v => { document.getElementById('detShopLogo').src = v.data().logo || 'https://cdn-icons-png.flaticon.com/512/606/606673.png'; });
-        const sGrid = document.getElementById('suggestionGrid'); sGrid.innerHTML = "";
-        allP.slice(0, 4).forEach((p, i) => { if(p.id !== activeP.id) sGrid.innerHTML += `<div class="product-card" onclick="viewProduct(${allP.indexOf(p)})"><img src="${p.images[0]}"><div class="p-info"><div>${p.name}</div><div class="p-price">₹${p.price}</div></div></div>`; });
-        window.scrollTo(0,0);
-    }
-
-    function toggleDesc() { const d = document.getElementById('detDesc'); const b = document.getElementById('readMoreBtn'); if(d.classList.contains('desc-collapsed')) { d.classList.remove('desc-collapsed'); b.innerText = "- Show Less"; } else { d.classList.add('desc-collapsed'); b.innerText = "+ Read More"; } }
-
-    async function finalizeOrder() {
-        const n = document.getElementById('custN').value, ph = document.getElementById('custP').value, ad = document.getElementById('custA').value, pm = document.getElementById('payMethod').value, sz = document.getElementById('custSize').value, utr = document.getElementById('utrField').value;
-        if(!n || !ph || !ad || !sz) return alert("Details bharo!");
-        if(pm === 'Online' && !utr) return alert("Enter UTR ID!");
-        const pr = getPrices(activeP.price);
-        const orderID = "TL-" + Math.floor(100000 + Math.random() * 900000);
-        try {
-            await db.collection("orders").doc(orderID).set({ orderID, item: activeP.name, total: pr.total, customer: n, phone: ph, address: ad, size: sz, payment: pm, utr: utr || "COD", store: activeP.store, status: "Pending", time: firebase.firestore.FieldValue.serverTimestamp() });
-            let orders = JSON.parse(localStorage.getItem("myOrders") || "[]");
-            orders.push(orderID); localStorage.setItem("myOrders", JSON.stringify(orders));
-            updateCartBadge();
-            const vSnap = await db.collection("vendors").where("shop", "==", activeP.store).get();
-            let vPhone = "9897180748"; vSnap.forEach(v => { vPhone = v.data().phone; });
-            window.location.href = `https://wa.me/91${vPhone}?text=*NEW ORDER FROM TRENDING LOOP*%0A*Order ID:* ${orderID}%0A*Item:* ${activeP.name}%0A*Total:* ₹${pr.total}%0A*Customer:* ${n}`;
-        } catch(e) { alert("Error!"); }
-    }
-
-    // Yahan calculations ho rahi hain jo Checkout page par dikhengi
-    function openOrderModal() {
-        const pr = getPrices(activeP.price);
-        document.getElementById('qrAmt').innerText = pr.total;
-        document.getElementById('billDisplay').innerHTML = `Item: ₹${pr.base}<br>Delivery: ₹${pr.delivery}<br>Fees: ₹${pr.platform + pr.service}<br><b>Total Bill: ₹${pr.total}</b>`;
-        const pm = document.getElementById('payMethod'); pm.innerHTML = activeP.payment === 'online' ? `<option value="Online">Online Only</option>` : `<option value="COD">COD</option><option value="Online">Online Only</option>`;
-        document.getElementById('orderModal').style.display = 'flex';
-    }
-
-    function togglePay() { const m = document.getElementById('payMethod').value; document.getElementById('qrSection').style.display = m === 'Online' ? 'block' : 'none'; if(m === 'Online') document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('upi://pay?pa=adityahard@fam&am='+getPrices(activeP.price).total)}`; }
-    async function renderOrders(ids) { const list = document.getElementById('meeshoList'); list.innerHTML = ""; for(let id of ids) { const doc = await db.collection("orders").doc(id).get(); if(doc.exists) { const o = doc.data(); const st = o.status || "Pending"; let fill = "0%", truck = "0%", s2="", s3="", s4=""; if(st==="Packed"){ fill="33%"; truck="30%"; s2="done"; } else if(st==="Shipped"){ fill="66%"; truck="63%"; s2="done"; s3="done"; } else if(st==="Delivered"){ fill="100%"; truck="92%"; s2="done"; s3="done"; s4="done"; } list.innerHTML += `<div class="meesho-card"><b>ORDER #${id.split('-')[1]}</b><br><small>${o.item}</small><div class="stepper"><div class="step-line"></div><div class="step-fill" style="width:${fill}"></div><div class="truck-icon" style="left:${truck}">🚚</div><div class="dots"><div class="dot done">1</div><div class="dot ${s2}">2</div><div class="dot ${s3}">3</div><div class="dot ${s4}">✓</div></div><div class="step-labels"><span>Pending</span><span>Packed</span><span>Shipped</span><span>Delivered</span></div></div></div>`; } } }
-    function showTrack() { document.getElementById('homeView').style.display='none'; document.getElementById('detailView').style.display='none'; document.getElementById('trackView').style.display='block'; renderOrders(JSON.parse(localStorage.getItem("myOrders") || "[]")); }
-    function toggleMenu() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
-    function openTerms() { document.getElementById('termsModal').style.display = 'flex'; toggleMenu(); }
-    function closeTerms() { document.getElementById('termsModal').style.display = 'none'; }
-    function showHome() { document.getElementById('homeView').style.display='block'; document.getElementById('detailView').style.display='none'; document.getElementById('trackView').style.display='none'; }
-    function closeModal() { document.getElementById('orderModal').style.display = 'none'; }
-    function updateCartBadge() { document.getElementById('cartBadge').innerText = JSON.parse(localStorage.getItem("myOrders") || "[]").length; }
-    init();
-</script>
+    </script>
 </body>
-                </html>
-                
+</html>
